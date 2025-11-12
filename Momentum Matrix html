@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Momentum Matrix — Mini</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#7dd3fc;color-scheme:dark}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(180deg,#071029 0%,#071a2a 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);width:720px;max-width:94%}
+    h1{margin:0 0 12px;font-size:20px;letter-spacing:0.4px}
+    .controls{display:flex;gap:16px;align-items:center}
+    .col{flex:1}
+    label{font-size:12px;opacity:.9}
+    input[type=range]{width:100%}
+    .readout{margin-top:12px;display:flex;gap:12px;align-items:center}
+    .value{background:#021124;padding:10px;border-radius:8px;min-width:120px;text-align:center;font-weight:600}
+    .arena{height:120px;background:linear-gradient(90deg,#02162a,#031022);border-radius:8px;margin-top:18px;position:relative;overflow:hidden}
+    .ball{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#3b82f6);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .btn{margin-left:8px;padding:8px 12px;border-radius:8px;border:0;background:linear-gradient(90deg,#06b6d4,#3b82f6);cursor:pointer;font-weight:600}
+    footer{margin-top:12px;font-size:12px;opacity:.8}
+    .formula{font-family:monospace;background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Momentum Matrix — Interactive</h1>
+    <div class="controls">
+      <div class="col">
+        <label>Mass (kg): <span id="massLabel">1.00</span></label>
+        <input id="mass" type="range" min="0.1" max="10" step="0.1" value="1">
+      </div>
+      <div class="col">
+        <label>Velocity (m/s): <span id="velLabel">1.00</span></label>
+        <input id="vel" type="range" min="-20" max="20" step="0.1" value="1">
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <button id="launch" class="btn">Launch</button>
+      </div>
+    </div>
+
+    <div class="readout">
+      <div class="value">Momentum: <div id="momentum" style="font-size:16px;margin-top:6px">1.00 kg·m/s</div></div>
+      <div class="value formula">p = m × v</div>
+      <div style="margin-left:auto;font-size:13px">Tip: negative velocity → left</div>
+    </div>
+
+    <div class="arena" id="arena">
+      <div class="ball" id="ball"></div>
+    </div>
+
+    <footer>Short demo — adjust sliders and press <strong>Launch</strong> to see motion scaled by momentum.</footer>
+  </div>
+
+  <script>
+    const mass = document.getElementById('mass');
+    const vel = document.getElementById('vel');
+    const massLabel = document.getElementById('massLabel');
+    const velLabel = document.getElementById('velLabel');
+    const momentumEl = document.getElementById('momentum');
+    const ball = document.getElementById('ball');
+    const arena = document.getElementById('arena');
+    const launch = document.getElementById('launch');
+
+    function updateReadout(){
+      const m = parseFloat(mass.value);
+      const v = parseFloat(vel.value);
+      const p = +(m*v).toFixed(2);
+      massLabel.textContent = m.toFixed(2);
+      velLabel.textContent = v.toFixed(2);
+      momentumEl.textContent = p + ' kg·m/s';
+    }
+
+    function animateBall(){
+      const m = parseFloat(mass.value);
+      const v = parseFloat(vel.value);
+      const p = m*v; // can be negative
+      const arenaW = arena.clientWidth;
+      const maxShift = arenaW/2 - 40; // keep inside bounds
+      // scale momentum to shift - clamp
+      const scale = 6; // tweak for feel
+      let shift = Math.max(-maxShift, Math.min(maxShift, p*scale));
+      // set transition duration derived from magnitude (bigger momentum -> faster -> shorter duration)
+      const duration = Math.max(0.25, 1.8 - Math.min(1.6, Math.abs(p)/10));
+      ball.style.transition = `transform ${duration}s cubic-bezier(.2,.8,.2,1)`;
+      // translate: start from center (-50%) then move by shift px horizontally
+      ball.style.transform = `translate(calc(-50% + ${shift}px), -50%)`;
+    }
+
+    mass.addEventListener('input', updateReadout);
+    vel.addEventListener('input', updateReadout);
+    launch.addEventListener('click', animateBall);
+    // initialize
+    updateReadout();
+  </script>
+</body>
+</html>
