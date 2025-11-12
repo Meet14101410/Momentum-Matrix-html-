@@ -1,0 +1,36 @@
+// Momentum Matrix – Short JS
+const mass = document.getElementById('mass');
+const vel = document.getElementById('vel');
+const massLabel = document.getElementById('massLabel');
+const velLabel = document.getElementById('velLabel');
+const momentumEl = document.getElementById('momentum');
+const ball = document.getElementById('ball');
+const arena = document.getElementById('arena');
+const launch = document.getElementById('launch');
+
+function updateReadout() {
+  const m = parseFloat(mass.value);
+  const v = parseFloat(vel.value);
+  const p = +(m * v).toFixed(2);
+  massLabel.textContent = m.toFixed(2);
+  velLabel.textContent = v.toFixed(2);
+  momentumEl.textContent = p + ' kg·m/s';
+}
+
+function animateBall() {
+  const m = parseFloat(mass.value);
+  const v = parseFloat(vel.value);
+  const p = m * v;
+  const arenaW = arena.clientWidth;
+  const maxShift = arenaW / 2 - 40;
+  const scale = 6;
+  let shift = Math.max(-maxShift, Math.min(maxShift, p * scale));
+  const duration = Math.max(0.25, 1.8 - Math.min(1.6, Math.abs(p) / 10));
+  ball.style.transition = `transform ${duration}s cubic-bezier(.2,.8,.2,1)`;
+  ball.style.transform = `translate(calc(-50% + ${shift}px), -50%)`;
+}
+
+mass.addEventListener('input', updateReadout);
+vel.addEventListener('input', updateReadout);
+launch.addEventListener('click', animateBall);
+updateReadout();
